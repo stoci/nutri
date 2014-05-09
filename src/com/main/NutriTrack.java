@@ -1,9 +1,8 @@
 package src.com.main;
 import src.com.day.*;
 import src.com.food.*;
-import java.util.LinkedHashMap;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 import java.io.*;
 
 public class NutriTrack
@@ -13,7 +12,7 @@ public class NutriTrack
 	// key = name while value is food object
 	static HashMap<String,Food> food_db = new HashMap<String,Food>();
 	
-	static public void main(String [] args)
+	static public void main(String [] args) throws Exception
 	{
 		System.out.println("NutriTrack v0.1 Developed by stoci");
 		//load serialized DBs from files into program -- eventually use MySQL
@@ -23,14 +22,31 @@ public class NutriTrack
 		while(true)
 		{
 			System.out.print(">>> ");
-			String input = System.console().readLine();
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			String input = bufferedReader.readLine();
+			//String input = System.console().readLine();
 			String [] commands = input.trim().split(" ");
 			
 			if(input.trim().equalsIgnoreCase("exit"))
 				break;
 			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("food"))
 			{
-				NutriTrack.printFoodDB();
+				printFoodDB();
+			}
+			//third argument is date "xx/xx/xxxx"
+			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("day") 
+			&& commands[2].length()==10)
+			{
+				Day d = calendar_db.get(commands[2]);
+				if(d!=null)
+					printDay(d);
+				else
+					System.out.println("That date doesn't exist.");
+			}
+			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("day") 
+			&& commands[2].equalsIgnoreCase("all"))
+			{
+				printDayAll();
 			}
 			else if(commands[0].equalsIgnoreCase("addf")&& commands[1]!=null
 			&&commands[2]!=null && commands[3]!=null && commands[4]!=null)
@@ -39,7 +55,6 @@ public class NutriTrack
 				Double.parseDouble(commands[3]),Double.parseDouble(commands[4])));
 			}
 			//add food[3] to date(xx/xx/xxxx)[1] and meal(lunch)[2]
-			//possible create switch so can add 215g of chicken or something?
 			else if(commands[0].equalsIgnoreCase("addd")&& commands[1].length()==10
 			&&commands[2]!=null && commands[3]!=null)
 			{
@@ -69,7 +84,7 @@ public class NutriTrack
 			}
 			else if(commands[0].equalsIgnoreCase("help"))
 			{
-				System.out.println(" print food\n addf [name_of_food carbs protein fat]\n exit");
+				System.out.println(" print food\n addf [name_of_food carbs protein fat]\n addd [date meal name_of_food]\n print day [date]\n print day all\n exit");
 			}
 			else
 				System.out.println("Unrecognized command. Type help to see valid commands.");
@@ -119,6 +134,59 @@ public class NutriTrack
 			entry.getValue().getCarbs(), entry.getValue().getProtein(),
 			entry.getValue().getFat());
 		}
+	}
+	//11/12/1111
+	private static void printDay(Day day)
+	{
+		ArrayList<Food> breakfast = day.getBreakfast();
+		ArrayList<Food> lunch = day.getLunch();
+		ArrayList<Food> snack0 = day.getSnack0();
+		ArrayList<Food> dinner = day.getDinner();
+		ArrayList<Food> snack1 = day.getSnack1();
+		
+		ListIterator<Food> litr = breakfast.listIterator();
+
+		System.out.println(day.getDate());
+		System.out.printf("%-15s","Breakfast: ");
+		while(litr.hasNext())
+		{
+			System.out.print(litr.next().getName()+" ");
+		}
+
+		litr = lunch.listIterator();
+		System.out.printf("%-15s","\nLunch: ");
+		while(litr.hasNext())
+		{
+			System.out.print(litr.next().getName()+" ");
+		}
+
+		litr = snack0.listIterator();
+		System.out.printf("%-15s","\nSnack0: ");
+		while(litr.hasNext())
+		{
+			System.out.print(litr.next().getName()+" ");
+		}
+		
+		litr = dinner.listIterator();
+		System.out.printf("%-15s","\nDinner: ");
+		while(litr.hasNext())
+		{
+			System.out.print(litr.next().getName()+" ");
+		}
+
+		litr = snack1.listIterator();
+		System.out.printf("%-15s","\nSnack 1: ");
+		while(litr.hasNext())
+		{
+			System.out.print(litr.next().getName()+" ");
+		}
+		System.out.println();		
+	}
+	//dump all days to console
+	private static void printDayAll()
+	{
+		for(Map.Entry<String,Day> entry : calendar_db.entrySet())
+			printDay(entry.getValue());
 	}
 	private static void updateFoodDB()
 	{		
