@@ -1,9 +1,12 @@
 package src.com.main;
+
+
 import src.com.day.*;
 import src.com.food.*;
-
+import java.sql.*;
 import java.util.*;
 import java.io.*;
+
 
 public class NutriTrack
 {
@@ -18,7 +21,21 @@ public class NutriTrack
 		//load serialized DBs from files into program -- eventually use MySQL
 		NutriTrack.initializeFoodDB();
 		NutriTrack.initializeCalendarDB();
+		Connection conn = null;
 		
+		/*try to connect to DB*/
+		try
+		{
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/crashcourse","root","password");
+			Statement s = conn.createStatement();
+			ResultSet rs = s.executeQuery("SELECT prod_name,prod_price FROM crashcourse.products");
+			while(rs.next()!=false)
+				System.out.println(rs.getString("prod_name"));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		while(true)
 		{
 			System.out.print(">>> ");
