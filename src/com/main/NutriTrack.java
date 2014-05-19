@@ -21,21 +21,23 @@ public class NutriTrack
 		//load serialized DBs from files into program -- eventually use MySQL
 		NutriTrack.initializeFoodDB();
 		NutriTrack.initializeCalendarDB();
-		Connection conn = null;
+		Connection conn = null; Statement s = null; ResultSet rs = null;
 		
 		/*try to connect to DB*/
 		try
 		{
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/crashcourse","root","password");
-			Statement s = conn.createStatement();
-			ResultSet rs = s.executeQuery("SELECT prod_name,prod_price FROM crashcourse.products");
-			while(rs.next()!=false)
-				System.out.println(rs.getString("prod_name"));
+			s = conn.createStatement();
+			rs = s.executeQuery("SELECT prod_name,prod_price FROM crashcourse.products");
+			//while(rs.next()!=false)
+				//System.out.println(rs.getString("prod_name"));
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
+		finally{conn.close();s.close();rs.close();}
+		
 		while(true)
 		{
 			System.out.print(">>> ");
