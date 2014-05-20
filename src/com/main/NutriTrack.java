@@ -3,12 +3,19 @@ package src.com.main;
 
 import src.com.day.*;
 import src.com.food.*;
+
 import java.sql.*;
 import java.util.*;
 import java.io.*;
 
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-public class NutriTrack
+
+public class NutriTrack extends Application
 {
 	// key = date "xx/xx/xxxx" while value is day object
 	static LinkedHashMap<String,Day> calendar_db = new LinkedHashMap<String,Day>();
@@ -23,7 +30,7 @@ public class NutriTrack
 		NutriTrack.initializeCalendarDB();
 		Connection conn = null; Statement s = null; ResultSet rs = null;
 		
-		/*try to connect to DB*/
+		/*try to connect to DB -- future use*/
 		try
 		{
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/crashcourse","root","password");
@@ -38,6 +45,7 @@ public class NutriTrack
 		}
 		finally{conn.close();s.close();rs.close();}
 		
+		/*processes commands in infinite loop*/
 		while(true)
 		{
 			System.out.print(">>> ");
@@ -46,13 +54,14 @@ public class NutriTrack
 			//String input = System.console().readLine();
 			String [] commands = input.trim().split(" ");
 			
-			if(input.trim().equalsIgnoreCase("exit"))
-				break;
+			/*exit command breaks while loop*/
+			if(input.trim().equalsIgnoreCase("exit")) break;
+			/*prints out all food currently in database file*/
 			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("food"))
 			{
 				printFoodDB();
 			}
-			//third argument is date "xx/xx/xxxx"
+			/*print out all meals in a specific day -- input format: xx/xx/xxxx */
 			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("day") 
 			&& commands[2].length()==10)
 			{
@@ -62,18 +71,20 @@ public class NutriTrack
 				else
 					System.out.println("That date doesn't exist.");
 			}
+			/*print out every day including meals in database*/
 			else if(commands[0].equalsIgnoreCase("print") && commands[1].equalsIgnoreCase("day") 
 			&& commands[2].equalsIgnoreCase("all"))
 			{
 				printDayAll();
 			}
+			/*add new food to database*/
 			else if(commands[0].equalsIgnoreCase("addf")&& commands[1]!=null
 			&&commands[2]!=null && commands[3]!=null && commands[4]!=null)
 			{
 				food_db.put(commands[1],new Food(commands[1],Double.parseDouble(commands[2]),
-				Double.parseDouble(commands[3]),Double.parseDouble(commands[4])));
+				Double.parseDouble(commands[3]),Double.parseDouble(commands[4]),Double.parseDouble(commands[5])));
 			}
-			//add food[3] to date(xx/xx/xxxx)[1] and meal(lunch)[2]
+			/*add specific food[3] to specific date(xx/xx/xxxx)[1] and specific meal(lunch)[2]*/
 			else if(commands[0].equalsIgnoreCase("addd")&& commands[1].length()==10
 			&&commands[2]!=null && commands[3]!=null)
 			{
@@ -101,17 +112,22 @@ public class NutriTrack
 				//food not in database
 				else System.out.println("Please use addf command to add this food!");
 			}
+			/*print out list of valid commands*/
 			else if(commands[0].equalsIgnoreCase("help"))
 			{
-				System.out.println(" print food\n addf [name_of_food carbs protein fat]\n addd [date meal name_of_food]\n print day [date]\n print day all\n exit");
+				System.out.println(" print food\n addf [name_of_food carbs protein fat grams/serving]\n addd [date meal name_of_food]\n print day [date]\n print day all\n exit");
 			}
+			/*command doesn't exist*/
 			else
 				System.out.println("Unrecognized command. Type help to see valid commands.");
 		}
+		/*update database files with any changes*/
 		updateCalendarDB();
 		updateFoodDB();
+		launch(args);
 	}
 	
+	/*create serialized input stream and read the HashMap containing all stored Foods*/
 	private static void initializeFoodDB()
 	{
 		try
@@ -126,12 +142,12 @@ public class NutriTrack
 			System.out.println(e);
 		}
 	}
-	//read in serialized LinkedHashMap
+	
+	/*create serialized input stream and read the LinkedHashMap containing all stored Days*/
 	private static void initializeCalendarDB()
 	{
 		try
 		{
-			//initialize food hashtable
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("calendar_db.txt"));
 			calendar_db = (LinkedHashMap<String,Day>) ois.readObject();
 			
@@ -144,6 +160,7 @@ public class NutriTrack
 		}
 	}
 	
+	/*print to console ALL Food objects*/
 	private static void printFoodDB()
 	{
 		System.out.printf("%-25s %10s %10s %10s %n", "Name", "C", "P", "F");
@@ -154,7 +171,7 @@ public class NutriTrack
 			entry.getValue().getFat());
 		}
 	}
-	//11/12/1111
+	/*print the specified Day object including meals to console*/
 	private static void printDay(Day day)
 	{
 		ArrayList<Food> breakfast = day.getBreakfast();
@@ -201,12 +218,13 @@ public class NutriTrack
 		}
 		System.out.println();		
 	}
-	//dump all days to console
+	/*print ALL Days in database including meals to console*/
 	private static void printDayAll()
 	{
 		for(Map.Entry<String,Day> entry : calendar_db.entrySet())
 			printDay(entry.getValue());
 	}
+	/*create output stream and serialize the food_db HashMap for storage*/
 	private static void updateFoodDB()
 	{		
 		try
@@ -221,7 +239,7 @@ public class NutriTrack
 			System.out.println(e);
 		}
 	}
-	//update calendar file with any changes
+	/*create output stream and serialize the calendar_db LinkedHashMap for storage*/
 	private static void updateCalendarDB()
 	{		
 		try
@@ -236,7 +254,7 @@ public class NutriTrack
 			System.out.println(e);
 		}
 	}
-	//reduce verbosity in main
+	/*add specific Food to specific meal in a Day object*/
 	private static void addFood2Day(Food f, Day d, String meal)
 	{
 		if(meal.equalsIgnoreCase("breakfast"))
@@ -249,5 +267,22 @@ public class NutriTrack
 			calendar_db.get(d.getDate()).setDinner(f);
 		if(meal.equalsIgnoreCase("snack1"))
 			calendar_db.get(d.getDate()).setSnack1(f);
+	}
+
+	/*start JavaFX GUI*/
+	@Override
+	public void start(Stage primaryStage) throws Exception 
+	{
+		/*overall window layout: top,left,center,right,bottom*/
+		BorderPane borderPane = new BorderPane();
+		/*layout of left which is for adding food eaten to specific day->meal*/
+		VBox leftVBox= new VBox();
+		/*layout of right which is for adding new food to the database*/
+		VBox rightVBox = new VBox();
+		
+		borderPane.setLeft(leftVBox);
+		Scene scene = new Scene(borderPane, 1280, 720);
+		primaryStage.setScene(scene); primaryStage.setTitle("NutriTrack v0.1");
+		primaryStage.show();
 	}
 }
