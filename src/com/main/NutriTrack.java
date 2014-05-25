@@ -9,8 +9,14 @@ import java.util.*;
 import java.io.*;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -24,6 +30,7 @@ public class NutriTrack extends Application
 	
 	static public void main(String [] args) throws Exception
 	{
+		launch(args);
 		System.out.println("NutriTrack v0.1 Developed by stoci");
 		//load serialized DBs from files into program -- eventually use MySQL
 		NutriTrack.initializeFoodDB();
@@ -124,7 +131,7 @@ public class NutriTrack extends Application
 		/*update database files with any changes*/
 		updateCalendarDB();
 		updateFoodDB();
-		launch(args);
+		
 	}
 	
 	/*create serialized input stream and read the HashMap containing all stored Foods*/
@@ -277,10 +284,17 @@ public class NutriTrack extends Application
 		BorderPane borderPane = new BorderPane();
 		/*layout of left which is for adding food eaten to specific day->meal*/
 		VBox leftVBox= new VBox();
-		/*layout of right which is for adding new food to the database*/
-		VBox rightVBox = new VBox();
+		/*layout of right which is for RUD'ing food in the database*/
+		FlowPane rightFPane = new FlowPane(); rightFPane.setPrefWrapLength(190); rightFPane.setVgap(2);rightFPane.setHgap(2);
+		/*element included in rightFpane*/
+		ObservableList<String> actions = FXCollections.observableArrayList("Add","Update","Delete");
+		ComboBox<String> selectActionCB = new ComboBox<String>(); selectActionCB.setItems(actions);
+		Label nameLabel = new Label("Name");Label actionLabel = new Label("Select action: ");
+		TextField nameField = new TextField();
+		rightFPane.getChildren().addAll(actionLabel, selectActionCB,nameLabel,nameField);
 		
-		borderPane.setLeft(leftVBox);
+		
+		borderPane.setLeft(leftVBox); borderPane.setRight(rightFPane);
 		Scene scene = new Scene(borderPane, 1280, 720);
 		primaryStage.setScene(scene); primaryStage.setTitle("NutriTrack v0.1");
 		primaryStage.show();
