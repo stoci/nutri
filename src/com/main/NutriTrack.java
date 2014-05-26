@@ -11,7 +11,10 @@ import java.io.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -36,21 +39,6 @@ public class NutriTrack extends Application
 		NutriTrack.initializeFoodDB();
 		NutriTrack.initializeCalendarDB();
 		Connection conn = null; Statement s = null; ResultSet rs = null;
-		
-		/*try to connect to DB -- future use*/
-		try
-		{
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/crashcourse","root","password");
-			s = conn.createStatement();
-			rs = s.executeQuery("SELECT prod_name,prod_price FROM crashcourse.products");
-			//while(rs.next()!=false)
-				//System.out.println(rs.getString("prod_name"));
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally{conn.close();s.close();rs.close();}
 		
 		/*processes commands in infinite loop*/
 		while(true)
@@ -285,18 +273,74 @@ public class NutriTrack extends Application
 		/*layout of left which is for adding food eaten to specific day->meal*/
 		VBox leftVBox= new VBox();
 		/*layout of right which is for RUD'ing food in the database*/
-		FlowPane rightFPane = new FlowPane(); rightFPane.setPrefWrapLength(190); rightFPane.setVgap(2);rightFPane.setHgap(2);
-		/*element included in rightFpane*/
-		ObservableList<String> actions = FXCollections.observableArrayList("Add","Update","Delete");
-		ComboBox<String> selectActionCB = new ComboBox<String>(); selectActionCB.setItems(actions);
-		Label nameLabel = new Label("Name");Label actionLabel = new Label("Select action: ");
-		TextField nameField = new TextField();
-		rightFPane.getChildren().addAll(actionLabel, selectActionCB,nameLabel,nameField);
+		VBox rightBox = configureRight();
+
 		
 		
-		borderPane.setLeft(leftVBox); borderPane.setRight(rightFPane);
+		
+		borderPane.setLeft(leftVBox); borderPane.setRight(rightBox);
 		Scene scene = new Scene(borderPane, 1280, 720);
 		primaryStage.setScene(scene); primaryStage.setTitle("NutriTrack v0.1");
 		primaryStage.show();
+	}
+	
+	private VBox configureRight()
+	{
+		/*set up two column layout*/
+		VBox rightVBox = new VBox(); //rightFPane.setPrefWrapLength(190); rightFPane.setVgap(2);rightFPane.setHgap(2);
+		/*database actions list*/
+		ObservableList<String> actions = FXCollections.observableArrayList("Add","Update","Delete");
+		/*combobox containing list of database actions -- need event listener?*/
+		ComboBox<String> selectActionCB = new ComboBox<String>(); selectActionCB.setItems(actions);
+		/*all necessary labels*/
+		Label nameLabel = new Label("Name*: ");Label actionLabel = new Label("Select action: ");
+		Label servLabel = new Label("Serving Size: ");Label fatLabel = new Label("Fat: ");
+		Label cholLabel = new Label("Cholesterol: ");Label sodiumLabel = new Label("Sodium: ");
+		Label carbLabel = new Label("Carbohydrates: ");Label proteinLabel = new Label("Protein: ");
+		Label statusLabel = new Label(); statusLabel.setStyle("-fx-text-fill: #ff6347");
+		/*all necessary textfields*/
+		TextField nameField = new TextField();TextField servField = new TextField();
+		TextField fatField = new TextField();TextField cholField = new TextField();
+		TextField sodiumField = new TextField();TextField carbField = new TextField();
+		TextField proteinField = new TextField();
+		/*right submit button*/
+		Button rightBtn = new Button("Submit"); //rightBox.getChildren().add(rightBtn);
+		/*event listener*/
+		rightBtn.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) 
+			{
+				/*make sure action selected in combobox*/
+				if(selectActionCB.getValue()==null || nameField.getText().equals(""))statusLabel.setText("No action selected or name field empty.");
+				//else if()
+				else 
+				{
+					statusLabel.setText("");
+					modifyFoodDB(selectActionCB.getValue(),nameField.getText(),servField.getText());
+				}
+			}
+		});
+		rightVBox.getChildren().addAll(actionLabel, selectActionCB,nameLabel,nameField,servLabel,servField,fatLabel,fatField,
+				cholLabel,cholField,sodiumLabel,sodiumField,carbLabel,carbField,proteinLabel,proteinField,rightBtn,statusLabel);
+		return rightVBox;
+	}
+	
+	private void modifyFoodDB(String...info)
+	{
+		Connection conn = null; Statement s = null; ResultSet rs = null;
+		/*try to connect to mysql DB*/
+		try
+		{
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/nutri","root","password");
+			s = conn.createStatement();
+			rs = s.executeQuery("SELECT * FROM food");
+			//while(rs.next()!=false)
+				//System.out.println(rs.getString("name"));
+			conn.close();s.close();rs.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
