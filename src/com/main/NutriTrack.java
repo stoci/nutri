@@ -219,7 +219,7 @@ public class NutriTrack extends Application
 		TextField sodiumField = new TextField();TextField carbField = new TextField();
 		TextField proteinField = new TextField();
 		/*right submit button*/
-		Button rightBtn = new Button("Submit"); //rightBox.getChildren().add(rightBtn);
+		Button rightBtn = new Button("Submit"); 
 		/*event listener*/
 		rightBtn.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
@@ -233,8 +233,7 @@ public class NutriTrack extends Application
 					statusLabel.setText("");
 					Food f = new Food(nameField.getText(),servField.getText(),fatField.getText(),cholField.getText(),sodiumField.getText(),
 							carbField.getText(),proteinField.getText());
-					String s = modifyFoodDB(selectActionCB.getValue(),nameField.getText(),servField.getText(),fatField.getText(),cholField.getText(),sodiumField.getText(),
-							carbField.getText(),proteinField.getText());
+					String s = modifyFoodDB(selectActionCB.getValue(),f);
 					statusLabel.setText(s);
 				}
 			}
@@ -244,7 +243,7 @@ public class NutriTrack extends Application
 		return rightVBox;
 	}
 	
-	private String modifyFoodDB(String...arr)
+	private String modifyFoodDB(String action, Food f)
 	{
 		Connection conn = null; Statement s = null; ResultSet rs; String m="";
 		/*try to connect to mysql DB*/
@@ -252,11 +251,12 @@ public class NutriTrack extends Application
 		{
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/nutri","root","password");
 			s = conn.createStatement();
-			switch(arr[0].toLowerCase())
+			switch(action.toLowerCase())
 			{
 				case "add":
 					s.executeUpdate("INSERT INTO food(name,serv_size,fat,cholesterol,sodium,carbs,protein) "
-							+ "VALUES("+"'"+arr[1]+"'"+","+arr[2]+","+arr[3]+","+arr[4]+","+arr[5]+","+arr[6]+","+arr[7]+");");
+							+ "VALUES("+"'"+f.getName()+"'"+","+f.getServ_size()+","+f.getFat()+","+f.getCholesterol()
+							+","+f.getSodium()+","+f.getCarbs()+","+f.getProtein()+");");
 					m="Success";
 					break;
 				case "update":
