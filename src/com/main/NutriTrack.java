@@ -8,7 +8,6 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
-import java.io.*;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -24,17 +23,12 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
 public class NutriTrack extends Application
 {
-	// key = date "xx/xx/xxxx" while value is day object
-	static LinkedHashMap<String,Day> calendar_db = new LinkedHashMap<String,Day>();
-	// key = name while value is food object
-	static HashMap<String,Food> food_db = new HashMap<String,Food>();
 	/*database interaction objects*/
 	Connection conn = null; Statement s = null; ResultSet rs=null; 
 	ArrayList<String> result=new ArrayList<String>();
@@ -43,148 +37,6 @@ public class NutriTrack extends Application
 	{
 		launch(args);
 		
-	}
-	
-	/*create serialized input stream and read the HashMap containing all stored Foods*/
-	private static void initializeFoodDB()
-	{
-		try
-		{
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("food_db.txt"));
-			food_db = (HashMap<String,Food>) ois.readObject();
-			
-			ois.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-	}
-	
-	/*create serialized input stream and read the LinkedHashMap containing all stored Days*/
-	private static void initializeCalendarDB()
-	{
-		try
-		{
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("calendar_db.txt"));
-			calendar_db = (LinkedHashMap<String,Day>) ois.readObject();
-			
-			//System.out.println(calendar_db.get("11/12/1111").getLunch().get(0).getName());
-			ois.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-	}
-	
-	/*print to console ALL Food objects*/
-	private static void printFoodDB()
-	{
-		System.out.printf("%-25s %10s %10s %10s %n", "Name", "C", "P", "F");
-		for ( Map.Entry<String,Food> entry : food_db.entrySet() )
-		{
-			//System.out.printf("%-25s %10.2f %10.2f %10.2f %n", entry.getKey(), 
-			//entry.getValue().getCarbs(), entry.getValue().getProtein(),
-			//entry.getValue().getFat());
-		}
-	}
-	/*print the specified Day object including meals to console*/
-	private static void printDay(Day day)
-	{
-		ArrayList<Food> breakfast = day.getBreakfast();
-		ArrayList<Food> lunch = day.getLunch();
-		ArrayList<Food> snack0 = day.getSnack0();
-		ArrayList<Food> dinner = day.getDinner();
-		ArrayList<Food> snack1 = day.getSnack1();
-		
-		ListIterator<Food> litr = breakfast.listIterator();
-
-		System.out.println(day.getDate());
-		System.out.printf("%-15s","Breakfast: ");
-		while(litr.hasNext())
-		{
-		//	System.out.print(litr.next().getName()+" ");
-		}
-
-		litr = lunch.listIterator();
-		System.out.printf("%-15s","\nLunch: ");
-		while(litr.hasNext())
-		{
-		//	System.out.print(litr.next().getName()+" ");
-		}
-
-		litr = snack0.listIterator();
-		System.out.printf("%-15s","\nSnack0: ");
-		while(litr.hasNext())
-		{
-		//	System.out.print(litr.next().getName()+" ");
-		}
-		
-		litr = dinner.listIterator();
-		System.out.printf("%-15s","\nDinner: ");
-		while(litr.hasNext())
-		{
-		//	System.out.print(litr.next().getName()+" ");
-		}
-
-		litr = snack1.listIterator();
-		System.out.printf("%-15s","\nSnack 1: ");
-		while(litr.hasNext())
-		{
-		//	System.out.print(litr.next().getName()+" ");
-		}
-		System.out.println();		
-	}
-	/*print ALL Days in database including meals to console*/
-	private static void printDayAll()
-	{
-		for(Map.Entry<String,Day> entry : calendar_db.entrySet())
-			printDay(entry.getValue());
-	}
-	/*create output stream and serialize the food_db HashMap for storage*/
-	private static void updateFoodDB()
-	{		
-		try
-		{
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("food_db.txt"));
-			oos.writeObject(NutriTrack.food_db);
-			
-			oos.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-	}
-	/*create output stream and serialize the calendar_db LinkedHashMap for storage*/
-	private static void updateCalendarDB()
-	{		
-		try
-		{
-			//add Day to calendar_db.txt
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("calendar_db.txt"));
-			oos.writeObject(NutriTrack.calendar_db);
-			oos.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-	}
-	/*add specific Food to specific meal in a Day object*/
-	private static void addFood2Day(Food f, Day d, String meal)
-	{
-		if(meal.equalsIgnoreCase("breakfast"))
-			calendar_db.get(d.getDate()).setBreakfast(f);
-		if(meal.equalsIgnoreCase("lunch"))
-			calendar_db.get(d.getDate()).setLunch(f);
-		if(meal.equalsIgnoreCase("snack0"))
-			calendar_db.get(d.getDate()).setSnack0(f);
-		if(meal.equalsIgnoreCase("dinner"))
-			calendar_db.get(d.getDate()).setDinner(f);
-		if(meal.equalsIgnoreCase("snack1"))
-			calendar_db.get(d.getDate()).setSnack1(f);
 	}
 
 	/*start JavaFX GUI*/
@@ -230,9 +82,9 @@ public class NutriTrack extends Application
 		ObservableList<String> foods = FXCollections.observableArrayList(result);
 		/*combobox containing all food objects*/
 		ComboBox<String> nameCB = new ComboBox<String>(); nameCB.setItems(foods);
-		/*get today's date*/
+		/*get today's date in US format*/
 		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("mm/dd/yyyy");
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 
 
 		/*combobox containing types of meals -- breakfast, lunch, dinner, snack0, snack1*/
@@ -252,6 +104,20 @@ public class NutriTrack extends Application
 			@Override
 			public void handle(ActionEvent event) 
 			{
+				// Get properly formatted date string for mySQL YYYY-MM-DD
+				String d = dateField.getText();
+				if(d.length()!=10)statusLabel.setText("Date format MM/DD/YYYY");
+				else if(servField.getText().length()==0)statusLabel.setText("Serving size empty");
+				else	
+				{
+					// extract proper date String
+					d = d.substring(6, d.length())+"-"+d.substring(0, 2)+"-"+d.substring(3, 5);
+					// Make call to db
+					String s = modifyFoodDB("add meal",new Meal(d,typeCB.getValue(),
+							Integer.parseInt(servField.getText()),nameCB.getValue()));
+					statusLabel.setText(s);
+				}
+
 				
 			}
 		});
@@ -308,7 +174,7 @@ public class NutriTrack extends Application
 		return rightVBox;
 	}
 	
-	private String modifyFoodDB(String action, Food f)
+	private String modifyFoodDB(String action, Object o)
 	{
 		String m="";
 		/*try to connect to mysql DB*/
@@ -318,26 +184,37 @@ public class NutriTrack extends Application
 			s = conn.createStatement();
 			switch(action.toLowerCase())
 			{
+				/*add new food to food table*/
 				case "add":
 					s.executeUpdate("INSERT INTO food(name,serv_size,fat,cholesterol,sodium,carbs,protein) "
-							+ "VALUES("+"'"+f.getName()+"'"+","+f.getServ_size()+","+f.getFat()+","+f.getCholesterol()
-							+","+f.getSodium()+","+f.getCarbs()+","+f.getProtein()+");");
+							+ "VALUES("+"'"+((Food)o).getName()+"'"+","+((Food) o).getServ_size()+","
+							+((Food) o).getFat()+","+((Food) o).getCholesterol()
+							+","+((Food) o).getSodium()+","+((Food) o).getCarbs()+","+((Food) o).getProtein()+");");
 					m="Success";modifyFoodDB("select name",null);break;
 				case "update":
 					break;
 				case "delete":
 					break;
+				/*retrieves name column from food table*/
 				case "select name":
 					rs = s.executeQuery("SELECT name FROM food;");
+					while(rs.next()!=false)
+						result.add(rs.getString("name"));
+					m="Success";break;
+				/*add new meal*/
+				case "add meal":
+					rs = s.executeQuery("SELECT food_id FROM food WHERE name='"+((Meal)o).getName()+"';");
+					rs.next();
+					s.executeUpdate("INSERT INTO meal(meal_date,food_id,meal_type,num_serv) "
+							+ "VALUES("+"'"+((Meal)o).getDate()+"',"+rs.getString(1)+","
+							+"'"+((Meal)o).getType()+"',"+((Meal)o).getServ_size()+");");
 					m="Success";break;
 			}
 			/*rs = s.executeQuery("SELECT * FROM food");
 			while(rs.next()!=false)
 				System.out.println(rs.getString("name"));*/
-			while(rs.next()!=false)
-					result.add(rs.getString("name"));
 			
-			conn.close();s.close();
+			conn.close();s.close(); if(rs!=null)rs.close();
 		}
 		catch(Exception e)
 		{
