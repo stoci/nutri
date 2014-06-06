@@ -7,14 +7,10 @@ import src.com.food.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-<<<<<<< HEAD
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.SessionStatistics;
-=======
 import java.util.Date;
->>>>>>> e5c16ebd04bd752b19d7d8311bc66ebcd89b9061
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -36,29 +32,19 @@ import javafx.stage.Stage;
 
 public class NutriTrack extends Application
 {
-<<<<<<< HEAD
 	// key = date "xx/xx/xxxx" while value is day object
 	static LinkedHashMap<String,Day> calendar_db = new LinkedHashMap<String,Day>();
 	// key = name while value is food object
 	static HashMap<String,Food> food_db = new HashMap<String,Food>();
 	SessionFactory factory;
-=======
 	/*database interaction objects*/
 	Connection conn = null; Statement s = null; ResultSet rs=null; 
 	ArrayList<String> result=new ArrayList<String>();
->>>>>>> e5c16ebd04bd752b19d7d8311bc66ebcd89b9061
 	
 	static public void main(String [] args) throws Exception
 	{
 		launch(args);
-<<<<<<< HEAD
 	}
-
-=======
-		
-	}
->>>>>>> e5c16ebd04bd752b19d7d8311bc66ebcd89b9061
-
 	/*start JavaFX GUI*/
 	@Override
 	public void start(Stage primaryStage) throws Exception 
