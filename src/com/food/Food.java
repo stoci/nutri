@@ -8,15 +8,15 @@ public class Food
 {
 	/**/
 	private String name = "";	//name of food
-	private int carbs = 0;		//grams of carbohydrates
-	private int protein = 0;	//grams of protein
-	private int fat = 0;		//grams of fat
+	private double carbs = 0;		//grams of carbohydrates
+	private double protein = 0;	//grams of protein
+	private double fat = 0;		//grams of fat
 	private int serv_size = 0;	//grams per serving or quantity of item (typically 1)
 	private int cholesterol = 0;//milligrams cholesterol
 	private int sodium = 0;		//milligrams sodium
 	
 	/*constructor for properly formatted fields*/
-	public Food(String name, int carbs, int protein, int fat, int serv_size,
+	public Food(String name, double carbs, double protein, double fat, int serv_size,
 			int cholesterol, int sodium)
 	{
 		super();
@@ -34,11 +34,11 @@ public class Food
 	{
 		this.name=item[0];
 		this.serv_size=Integer.parseInt(item[1]);
-		this.fat=Integer.parseInt(item[2]);
+		this.fat=Double.parseDouble(item[2]);
 		this.cholesterol=Integer.parseInt(item[3]);
 		this.sodium=Integer.parseInt(item[4]);
-		this.carbs=Integer.parseInt(item[1]);
-		this.protein=Integer.parseInt(item[2]);
+		this.carbs=Double.parseDouble(item[5]);
+		this.protein=Double.parseDouble(item[6]);
 		
 	}
 	
@@ -57,27 +57,27 @@ public class Food
 		this.name = name;
 	}
 
-	public int getCarbs() {
+	public double getCarbs() {
 		return carbs;
 	}
 
-	public void setCarbs(int carbs) {
+	public void setCarbs(double carbs) {
 		this.carbs = carbs;
 	}
 
-	public int getProtein() {
+	public double getProtein() {
 		return protein;
 	}
 
-	public void setProtein(int protein) {
+	public void setProtein(double protein) {
 		this.protein = protein;
 	}
 
-	public int getFat() {
+	public double getFat() {
 		return fat;
 	}
 
-	public void setFat(int fat) {
+	public void setFat(double fat) {
 		this.fat = fat;
 	}
 
