@@ -7,10 +7,19 @@ import src.com.food.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.stat.SessionStatistics;
+
 import java.util.Date;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -36,7 +45,13 @@ public class NutriTrack extends Application
 	static LinkedHashMap<String,Day> calendar_db = new LinkedHashMap<String,Day>();
 	// key = name while value is food object
 	static HashMap<String,Food> food_db = new HashMap<String,Food>();
-	SessionFactory factory;
+	// Hibernate 4 SessionFactory initializer 
+	
+	Configuration configuration = new Configuration().configure().addPackage("src.com.food").addAnnotatedClass(src.com.food.Food.class);
+	StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+	SessionFactory factory = configuration.buildSessionFactory(builder.build());
+	
+
 	/*database interaction objects*/
 	Connection conn = null; Statement s = null; ResultSet rs=null; 
 	ArrayList<String> result=new ArrayList<String>();
@@ -49,6 +64,7 @@ public class NutriTrack extends Application
 	@Override
 	public void start(Stage primaryStage) throws Exception 
 	{
+		hibernateModify();
 		/*overall window layout: top,left,center,right,bottom*/
 		BorderPane borderPane = new BorderPane();
 		/*layout of left which is for adding food eaten to specific day->meal*/
@@ -161,15 +177,16 @@ public class NutriTrack extends Application
 			@Override
 			public void handle(ActionEvent event) 
 			{
+				
 				/*make sure action selected in combobox and name filled*/
 				if(selectActionCB.getValue()==null || nameField.getText().equals(""))statusLabel.setText("A required field is empty.");
 				/*pass data to modifyFoodDB method*/
 				else 
 				{
 					statusLabel.setText("");
-					Food f = new Food(nameField.getText(),servField.getText(),fatField.getText(),cholField.getText(),sodiumField.getText(),
-							carbField.getText(),proteinField.getText());
-					String s = modifyFoodDB(selectActionCB.getValue(),f);
+					//Food f = new Food(nameField.getText(),servField.getText(),fatField.getText(),cholField.getText(),sodiumField.getText(),
+							//carbField.getText(),proteinField.getText());
+					String s = modifyFoodDB(selectActionCB.getValue(),null);
 					statusLabel.setText(s);
 				}
 			}
@@ -233,6 +250,18 @@ public class NutriTrack extends Application
 	private void hibernateModify()
 	{
 		Session session = factory.openSession();
-		
+		Transaction t = null;
+		try
+		{
+			System.out.println(session.isConnected());
+	         System.out.println(session.get("food", 1));
+	         t.commit();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{session.close();}
 	}
 }
