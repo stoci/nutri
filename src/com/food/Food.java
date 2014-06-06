@@ -1,5 +1,9 @@
 package src.com.food;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name="nutri.Food")
 public class Food
 {
 	/**/
@@ -35,6 +39,12 @@ public class Food
 		this.sodium=Integer.parseInt(item[4]);
 		this.carbs=Integer.parseInt(item[1]);
 		this.protein=Integer.parseInt(item[2]);
+		
+	}
+	
+	/*standard no arg constructor for Hibernate*/
+	public Food()
+	{
 		
 	}
 
